@@ -1,6 +1,8 @@
-from tkinter import Tk, Label, Button, W, E, N, Entry, OptionMenu, StringVar, LabelFrame
+from tkinter import Tk, Label, Button, W, E, N, Entry, OptionMenu, StringVar, LabelFrame, Canvas
 from Moment_capacity import M_Rd
+
 import pandas as pd
+from draw_beam import Illustrator
 
 
 class CreateGUI:
@@ -16,19 +18,37 @@ class CreateGUI:
         self.calculate = Button(parent, text="Calculate", command=self.calculate_moment_capacity)
         self.calculate.grid(row=8)
 
-        # Input - Effective height =====================================================================================
-        self.labeld = Label(parent, text="d [m]")
-        self.labeld.grid(row=1, sticky=E)
+        # Input - Geometric input ======================================================================================
 
-        self.entryd = Entry(parent)
-        self.entryd.grid(row=1, column=1)
+        # Create a lableframe to store the geometry entrys in
+        self.geometryframe = LabelFrame(parent, text="Geometry", padx=10, pady=5)
+        self.geometryframe.grid(row=0, column=0, columnspan=5, rowspan=4)
 
-        # Input - Cross sectional width ================================================================================
-        self.labelb = Label(parent, text="b [m]")
-        self.labelb.grid(row=2, sticky=E)
+        self.labeld = Label(self.geometryframe, text="d [m]")
+        self.labeld.grid(row=0, column=0, sticky=E, padx=4)
 
-        self.entryb = Entry(parent)
-        self.entryb.grid(row=2, column=1)
+        self.entryd = Entry(self.geometryframe, width=8)
+        self.entryd.grid(row=0, column=1, padx=4, columnspan=1)
+
+        self.labelb = Label(self.geometryframe, text="b [m]")
+        self.labelb.grid(row=1, column=0, sticky=E, padx=4)
+
+        self.entryb = Entry(self.geometryframe, width=8)
+        self.entryb.grid(row=1, column=1, padx=4, columnspan=1)
+
+        self.labeln = Label(self.geometryframe, text="No\u0332 bars")
+        self.labeln.grid(row=2, column=0, padx=4, columnspan=1)
+
+        self.entryn = Entry(self.geometryframe, width=8)
+        self.entryn.grid(row=2, column=1, padx=4, columnspan=1)
+
+        # Create canvas for drawing a beam illustration ================================================================
+
+        self.canvas = Canvas(self.geometryframe, width=300, height=200)
+        self.canvas.grid(row=0, column=2, columnspan=1, rowspan=12)
+
+        # Call draw_beam to draw a cross section of a beam
+        Illustrator(self.parent, self.canvas)
 
         # Input - Partial coefficients =================================================================================
 
@@ -48,9 +68,6 @@ class CreateGUI:
         self.entry_steel = Entry(self.partialframe)
         self.entry_steel.grid(row=1, column=1)
 
-
-
-
         # Input - Reinforcement type ===================================================================================
 
         # Import reinforcement specs
@@ -62,13 +79,6 @@ class CreateGUI:
         # Add a column with reinforcement name
         self.reinforcement_table['name'] = '\u03D5' + self.reinforcement_table.index.astype(str) + 'B500B'
 
-        # Create label
-        self.labeln = Label(parent, text="Number of bars ")
-        self.labeln.grid(row=5, sticky=E)
-
-
-        self.entryn = Entry(parent)
-        self.entryn.grid(row=5, column=1)
 
         # Create drop down menu
         self.initial_value_reinforcement = StringVar(parent)
@@ -77,7 +87,7 @@ class CreateGUI:
         self.popupMenu = OptionMenu(parent, self.initial_value_reinforcement, * self.reinforcement_table.name)
         self.popupMenu.grid(row=6, column=1)
 
-        # Input - Concrete type ===================================================================================
+        # Input - Concrete type ========================================================================================
 
         # Import concrete specs
         self.concrete_series = pd.read_excel('InputData.xlsx', 'Concrete')
@@ -89,8 +99,6 @@ class CreateGUI:
 
         self.dropdownmenu_concrete = OptionMenu(parent, self.initial_value_concrete, *self.concrete_series.name)
         self.dropdownmenu_concrete.grid(row=9, column=1)
-
-
 
     def exit(self):
         parent.destroy()
